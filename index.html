@@ -13,10 +13,26 @@
 </head>
 
 <body>
-    <input id="load" type="file" accept="application/json" />
-    <input id="save" type="button" value="Save" />
+    <a id="load" href="#">Load</a>
+    <a id="save" href="#">Save</a>
+    <input id="filter" type="checkbox" checked /><label for="filter">Only show incomplete tasks</label>
     <div id="todo"></div>
-    <div id="item"></div>
+    <div id="show">
+        <h1 id="showName"></h1>
+        <button id="showClose">x</button>
+        <textarea id="showDesc"></textarea>
+        <button id="update">Update</button>
+        <button id="complete">Complete</button>
+    </div>
+    <button>New</button>
+    <div id="new">
+        <button id="newClose">x</button>
+        <textarea id="newDesc" placeholder="Description"></textarea>
+        <select>
+            <option>Parent ID</option>
+        </select>
+        <button>Assign</button>
+    </div>
 </body>
 
 </html>
