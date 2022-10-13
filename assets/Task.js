@@ -49,7 +49,7 @@ export class Task {
      * Return a brief string representation of this task item.
      */
     toString() {
-        return '[' + this.id + '] ' + (this.desc.length > 10 ? this.desc.substring(0, 7) + '...' : this.description);
+        return '[' + this.id + '] ' + (this.desc.length > 10 ? this.desc.substring(0, 7) + '...' : this.desc);
     }
 
     /**

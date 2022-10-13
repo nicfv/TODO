@@ -3,8 +3,6 @@ import { TodoList } from './Todo.js';
 
 window.onload = init;
 
-let currentView = 0;
-
 /**
  * General helper functions.
  */
@@ -12,22 +10,8 @@ const el = id => document.getElementById(id),
     showAll = () => !el('filter').checked,
     startDate = () => new Date(el('start').value).getTime() || 0,
     endDate = () => new Date(el('end').value).getTime() || 0,
-    setName = name => el('name').innerText = name,
-    setDate = date => el('date').innerText = date,
-    setPare = pare => el('pare').innerText = pare,
-    setDesc = desc => el('desc').innerText = desc,
-    linkPare = pare => el('pare').href = pare,
-    getDesc = () => el('desc').innerText,
-    getPID = () => +el('pids').value,
-    showShow = show => el('show').hidden = !show,
-    showPIDs = show => el('pids').hidden = !show,
-    showUpdt = show => el('updt').hidden = !show,
-    showCmpl = show => el('cmpl').hidden = !show,
-    showAssn = show => el('assn').hidden = !show,
-    enableDesc = enabled => el('desc').readOnly = !enabled,
-    enableUpdt = enabled => el('updt').disabled = !enabled,
-    enableCmpl = enabled => el('cmpl').disabled = !enabled,
-    enableAssn = enabled => el('assn').disabled = !enabled;
+    getDesc = () => el('desc').value,
+    getPID = () => +el('pids').value;
 
 /**
  * Initialize event handlers.
@@ -35,10 +19,13 @@ const el = id => document.getElementById(id),
 function init() {
     el('save').onclick = save;
     el('load').onclick = open;
-    el('new').onclick = () => show(0);
-    el('close').onclick = () => show(-1);
-    el('desc').oninput = () => enableUpdt(true);
-    el('updt').onclick = () => { enableDesc(true); enableUpdt(false); };
+    el('new').onclick = showNewForm;
+    el('start').onchange = refresh;
+    el('end').onchange = refresh;
+    el('filter').onchange = refresh;
+    el('close').onclick = closeForm;
+    el('desc').oninput = editedDesc;
+    el('assn').onclick = newTask;
 }
 
 /**
@@ -94,6 +81,22 @@ function open() {
 }
 
 /**
+ * Assign a new task to the to-do list.
+ */
+function newTask() {
+    show(TodoList.newTask(getDesc(), getPID()));
+    refresh();
+}
+
+/**
+ * This function is raised when the description is updated for any task.
+ */
+function editedDesc() {
+    el('assn').disabled = false;
+    el('updt').disabled = false;
+}
+
+/**
  * Create a line item for the current task.
  */
 function getLineItem(task) {
@@ -106,7 +109,7 @@ function getLineItem(task) {
     } else {
         item.innerText = task.toString();
     }
-    item.onclick = () => show(task.id);
+    item.onclick = () => show(task.id); console.log(item, task, task.toString());
     return item;
 }
 
@@ -114,7 +117,7 @@ function getLineItem(task) {
  * Regenerate the to-do task list.
  */
 function refresh() {
-    el('todo').innerText = '';
+    removeAllChildren(el('todo'));
     TodoList.forEach(task => el('todo').appendChild(getLineItem(task)), showAll(), startDate(), endDate());
 }
 
@@ -122,39 +125,56 @@ function refresh() {
  * Show the details of a to-do task item.
  */
 function show(id = 0) {
-    currentView = id;
-    if (id > 0) {
-        const task = TodoList.findTask(id);
-        if (task instanceof Task) {
-            showAssn(false);
-            showCmpl(true);
-            showPIDs(false);
-            showShow(true);
-            showUpdt(true);
-            enableAssn(false);
-            enableDesc(false);
-            enableCmpl(false);
-            enableUpdt(true);
-            setName(task.toString());
-            setDesc(task.desc);
-            setDate(task.getTimeRange());
-            clearParentIDs();
-        } else {
-            throw new Error('No task found with id ' + id + '.');
-        }
-    } else if (id < 0) {
-        showShow(false);
+    const task = TodoList.findTask(id);
+    if (task instanceof Task) {
+        showForm(task.toString(), task.getTimeRange(), TodoList.findParent(id)?.toString() || '', () => task.hasParent() && show(task.pid), task.desc, false, true, false, () => { task.desc = getDesc(); refresh(); }, true, !task.isComplete(), task.complete, false, false);
     } else {
-        showAssn(true);
-        showCmpl(false);
-        showPIDs(true);
-        showShow(true);
-        showUpdt(false);
-        enableAssn(false);
-        enableCmpl(false);
-        enableDesc(true);
-        enableUpdt(false);
-        setParentIDs();
+        throw new Error('No task found with id ' + id + '.');
+    }
+}
+
+/**
+ * Show a form ready to accept data for a new to-do task item.
+ */
+function showNewForm() {
+    showForm('', '', '', null, '', true, false, false, null, false, false, null, true, false);
+}
+
+/**
+ * Show the form and customize which controls are shown and enabled.
+ */
+function showForm(name = '', date = '', parent = '', parentOnClick = () => { }, description = '', parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, completeVisible = false, completeEnabled = false, completeOnClick = () => { }, assignVisible = false, assignEnabled = false) {
+    el('form').hidden = false;
+    el('name').innerText = name;
+    el('date').innerText = date;
+    el('pare').innerText = parent;
+    el('pare').onclick = parentOnClick;
+    el('desc').value = description;
+    el('pids').hidden = !parentIDsVisible;
+    el('updt').hidden = !updateVisible;
+    el('updt').disabled = !updateEnabled;
+    el('updt').onclick = updateOnClick;
+    el('cmpl').hidden = !completeVisible;
+    el('cmpl').disabled = !completeEnabled;
+    el('cmpl').onclick = completeOnClick;
+    el('assn').hidden = !assignVisible;
+    el('assn').disabled = !assignEnabled;
+    setParentIDs();
+}
+
+/**
+ * Close the form.
+ */
+function closeForm() {
+    el('form').hidden = true;
+}
+
+/**
+ * Remove all children from an HTML element.
+ */
+function removeAllChildren(element) {
+    while (element instanceof Element && element.firstChild) {
+        element.removeChild(element.firstChild);
     }
 }
 
@@ -162,10 +182,7 @@ function show(id = 0) {
  * Clear all parent IDs from the dropdown menu.
  */
 function clearParentIDs() {
-    let child;
-    while (child = el('pids').firstChild) {
-        el('pids').removeChild(child);
-    }
+    removeAllChildren(el('pids'));
     const defaultOption = document.createElement('option');
     defaultOption.innerText = 'No Parent';
     defaultOption.value = 0;

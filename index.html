@@ -24,18 +24,16 @@
         <input id="filter" type="checkbox" checked /><label for="filter">Only show incomplete tasks</label>
     </div>
     <div id="todo"></div>
-    <div id="show">
-        <button id="close">x</button>
-        <h1 id="name"></h1>
-        <h2 id="date"></h2>
-        <a id="pare"></a>
-        <textarea id="desc"></textarea>
-        <select id="pids">
-            <option value="0" selected>Parent ID</option>
-        </select>
-        <button id="updt">Update</button>
-        <button id="cmpl">Complete</button>
-        <button id="assn">Assign</button>
+    <div id="form">
+        <button id="close" title="Close the window.">x</button>
+        <h1 id="name" title="A unique, shorthand title for this task."></h1>
+        <h2 id="date" title="Displays when the task was started and completed."></h2>
+        <a id="pare" title="Click here to go to the parent task."></a>
+        <textarea id="desc" placeholder="Description" title="Type a description for the to-do task."></textarea>
+        <select id="pids" title="Optionally designate a parent task for organization."></select>
+        <button id="updt" title="Overwrite task description.">Update</button>
+        <button id="cmpl" title="Mark task as completed.">Complete</button>
+        <button id="assn" title="Add a new item in the to-do list.">Assign</button>
     </div>
 </body>
 
