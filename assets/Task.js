@@ -5,7 +5,7 @@ export class Task {
     /**
      * Create a new task based on user-defined parameters.
      */
-    constructor(id = 0, parentId = 0, description = '', start = Task.#getTimestamp(), end = '') {
+    constructor(id = 0, parentId = 0, description = '', start = Date.now(), end = 0) {
         this.id = id;
         this.pid = parentId;
         this.desc = description;
@@ -17,7 +17,7 @@ export class Task {
      * Determine if this task is completed or not.
      */
     isComplete() {
-        return !!this.end;
+        return this.end !== 0;
     }
 
     /**
@@ -32,21 +32,17 @@ export class Task {
      */
     complete() {
         if (!this.isComplete()) {
-            this.end = Task.#getTimestamp();
+            this.end = Date.now();
         } else {
             throw new Error('This task (' + this.id + ') is already completed.');
         }
     }
 
     /**
-     * Mark this task item as cancelled.
+     * Return human-readable start and end dates for this task.
      */
-    cancel() {
-        if (!this.isComplete()) {
-            this.end = 'Cancelled ' + Task.#getTimestamp();
-        } else {
-            throw new Error('This task (' + this.id + ') is already completed.');
-        }
+    getTimeRange() {
+        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isComplete() ? 'Completed on ' + new Date(this.end).toLocaleString() : 'In progress') + '.';
     }
 
     /**
@@ -60,17 +56,10 @@ export class Task {
      * Generate a new task from raw data.
      */
     static fromRaw(raw = {}) {
-        if (typeof raw['id'] === 'number' && typeof raw['pid'] === 'number' && typeof raw['desc'] === 'string' && typeof raw['start'] === 'string' && typeof raw['end'] === 'string') {
+        if (typeof raw['id'] === 'number' && typeof raw['pid'] === 'number' && typeof raw['desc'] === 'string' && typeof raw['start'] === 'number' && typeof raw['end'] === 'number') {
             return new Task(raw['id'], raw['pid'], raw['desc'], raw['start'], raw['end']);
         } else {
             throw new Error('Incorrect fields or field types in raw data.');
         }
-    }
-
-    /**
-     * Return the current local timestamp.
-     */
-    static #getTimestamp() {
-        return new Date().toLocaleString();
     }
 }
