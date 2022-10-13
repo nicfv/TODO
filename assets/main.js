@@ -9,22 +9,25 @@ let currentView = 0;
  * General helper functions.
  */
 const el = id => document.getElementById(id),
-    isFiltering = () => !!el('filter').checked,
+    showAll = () => !el('filter').checked,
     startDate = () => new Date(el('start').value).getTime() || 0,
     endDate = () => new Date(el('end').value).getTime() || 0,
     setName = name => el('name').innerText = name,
     setDate = date => el('date').innerText = date,
+    setPare = pare => el('pare').innerText = pare,
     setDesc = desc => el('desc').innerText = desc,
-    setPrnt = prnt => el('prnt').innerText = prnt,
-    linkPrnt = prnt => el('prnt').href = prnt,
+    linkPare = pare => el('pare').href = pare,
     getDesc = () => el('desc').innerText,
+    getPID = () => +el('pids').value,
     showShow = show => el('show').hidden = !show,
     showPIDs = show => el('pids').hidden = !show,
     showUpdt = show => el('updt').hidden = !show,
-    showComp = show => el('comp').hidden = !show,
+    showCmpl = show => el('cmpl').hidden = !show,
+    showAssn = show => el('assn').hidden = !show,
     enableDesc = enabled => el('desc').readOnly = !enabled,
     enableUpdt = enabled => el('updt').disabled = !enabled,
-    enableComp = enabled => el('comp').disabled = !enabled;
+    enableCmpl = enabled => el('cmpl').disabled = !enabled,
+    enableAssn = enabled => el('assn').disabled = !enabled;
 
 /**
  * Initialize event handlers.
@@ -32,6 +35,8 @@ const el = id => document.getElementById(id),
 function init() {
     el('save').onclick = save;
     el('load').onclick = open;
+    el('new').onclick = () => show(0);
+    el('close').onclick = () => show(-1);
     el('desc').oninput = () => enableUpdt(true);
     el('updt').onclick = () => { enableDesc(true); enableUpdt(false); };
 }
@@ -110,7 +115,7 @@ function getLineItem(task) {
  */
 function refresh() {
     el('todo').innerText = '';
-    TodoList.forEach(!isFiltering(), startDate(), endDate(), task => el('todo').appendChild(getLineItem(task)));
+    TodoList.forEach(task => el('todo').appendChild(getLineItem(task)), showAll(), startDate(), endDate());
 }
 
 /**
@@ -121,20 +126,63 @@ function show(id = 0) {
     if (id > 0) {
         const task = TodoList.findTask(id);
         if (task instanceof Task) {
-            showShow(true);
-            showComp(true);
+            showAssn(false);
+            showCmpl(true);
             showPIDs(false);
+            showShow(true);
             showUpdt(true);
+            enableAssn(false);
             enableDesc(false);
-            enableComp(false);
+            enableCmpl(false);
             enableUpdt(true);
             setName(task.toString());
             setDesc(task.desc);
             setDate(task.getTimeRange());
+            clearParentIDs();
         } else {
             throw new Error('No task found with id ' + id + '.');
         }
-    } else {
+    } else if (id < 0) {
         showShow(false);
+    } else {
+        showAssn(true);
+        showCmpl(false);
+        showPIDs(true);
+        showShow(true);
+        showUpdt(false);
+        enableAssn(false);
+        enableCmpl(false);
+        enableDesc(true);
+        enableUpdt(false);
+        setParentIDs();
     }
+}
+
+/**
+ * Clear all parent IDs from the dropdown menu.
+ */
+function clearParentIDs() {
+    let child;
+    while (child = el('pids').firstChild) {
+        el('pids').removeChild(child);
+    }
+    const defaultOption = document.createElement('option');
+    defaultOption.innerText = 'No Parent';
+    defaultOption.value = 0;
+    el('pids').appendChild(defaultOption);
+}
+
+/**
+ * Set all available parent IDs in the dropdown menu.
+ */
+function setParentIDs() {
+    clearParentIDs();
+    TodoList.forEach(task => {
+        if (task instanceof Task) {
+            const option = document.createElement('option');
+            option.innerText = task.toString();
+            option.value = task.id;
+            el('pids').appendChild(option);
+        }
+    }, false);
 }
