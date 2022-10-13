@@ -9,7 +9,7 @@ window.onload = init;
 const el = id => document.getElementById(id),
     showAll = () => !el('filter').checked,
     startDate = () => new Date(el('start').value).getTime() || 0,
-    endDate = () => new Date(el('end').value).getTime() || 0,
+    endDate = () => (new Date(el('end').value).getTime() + 24 * 60 * 60 * 1000) || 0,
     getDesc = () => el('desc').value,
     getPID = () => +el('pids').value;
 
@@ -26,6 +26,7 @@ function init() {
     el('close').onclick = closeForm;
     el('desc').oninput = editedDesc;
     el('assn').onclick = newTask;
+    closeForm();
 }
 
 /**
@@ -92,7 +93,7 @@ function newTask() {
  * This function is raised when the description is updated for any task.
  */
 function editedDesc() {
-    el('assn').disabled = false;
+    el('assn').disabled = !getDesc();
     el('updt').disabled = false;
 }
 
@@ -109,7 +110,7 @@ function getLineItem(task) {
     } else {
         item.innerText = task.toString();
     }
-    item.onclick = () => show(task.id); console.log(item, task, task.toString());
+    item.onclick = () => show(task.id);
     return item;
 }
 
@@ -127,7 +128,16 @@ function refresh() {
 function show(id = 0) {
     const task = TodoList.findTask(id);
     if (task instanceof Task) {
-        showForm(task.toString(), task.getTimeRange(), TodoList.findParent(id)?.toString() || '', () => task.hasParent() && show(task.pid), task.desc, false, true, false, () => { task.desc = getDesc(); refresh(); }, true, !task.isComplete(), task.complete, false, false);
+        const updateDesc = () => {
+            task.desc = getDesc();
+            el('updt').disabled = true;
+            refresh();
+        }, completeTask = () => {
+            task.complete();
+            refresh();
+            show(id);
+        }
+        showForm(task.toString(), task.getTimeRange(), TodoList.findParent(id)?.toString() || '', () => task.hasParent() && show(task.pid), task.desc, !task.isComplete(), false, !task.isComplete(), false, updateDesc, !task.isComplete(), !task.isComplete(), completeTask, false, false);
     } else {
         throw new Error('No task found with id ' + id + '.');
     }
@@ -137,19 +147,20 @@ function show(id = 0) {
  * Show a form ready to accept data for a new to-do task item.
  */
 function showNewForm() {
-    showForm('', '', '', null, '', true, false, false, null, false, false, null, true, false);
+    showForm('', '', '', null, '', true, true, false, false, null, false, false, null, true, false);
 }
 
 /**
  * Show the form and customize which controls are shown and enabled.
  */
-function showForm(name = '', date = '', parent = '', parentOnClick = () => { }, description = '', parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, completeVisible = false, completeEnabled = false, completeOnClick = () => { }, assignVisible = false, assignEnabled = false) {
+function showForm(name = '', date = '', parent = '', parentOnClick = () => { }, description = '', descriptionEnabled = false, parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, completeVisible = false, completeEnabled = false, completeOnClick = () => { }, assignVisible = false, assignEnabled = false) {
     el('form').hidden = false;
     el('name').innerText = name;
     el('date').innerText = date;
     el('pare').innerText = parent;
     el('pare').onclick = parentOnClick;
     el('desc').value = description;
+    el('desc').readOnly = !descriptionEnabled;
     el('pids').hidden = !parentIDsVisible;
     el('updt').hidden = !updateVisible;
     el('updt').disabled = !updateEnabled;
