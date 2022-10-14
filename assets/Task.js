@@ -49,7 +49,9 @@ export class Task {
      * Return a brief string representation of this task item.
      */
     toString() {
-        return '[' + this.id + '] ' + (this.desc.length > 10 ? this.desc.substring(0, 7) + '...' : this.desc);
+        const maxLength = 30,
+            lines = this.desc.trim().split('\n').filter(x => x);
+        return '[' + this.id + '] ' + (this.desc.length > maxLength || lines.length > 1 ? lines[0].trim().substring(0, maxLength - 3).trim() + '...' : lines[0].trim());
     }
 
     /**
