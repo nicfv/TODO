@@ -36,7 +36,7 @@ function save() {
         console.log('File Picker');
         (async function () {
             const data = new Blob([TodoList.getJSON()], { 'type': 'application/json' }),
-                handle = await showSaveFilePicker({ 'suggestedName': 'todo', 'types': [{ 'description': 'JSON file', 'accept': { 'application/json': ['.json'] } }] }),
+                handle = await showSaveFilePicker({ 'suggestedName': 'todo', 'excludeAcceptAllOption': true, 'types': [{ 'description': 'JSON file', 'accept': { 'application/json': ['.json'] } }] }),
                 writable = await handle.createWritable();
             await writable.write(data);
             writable.close();
@@ -60,7 +60,7 @@ function open() {
     if (window.showOpenFilePicker) {
         console.log('File Picker');
         (async function () {
-            const [handle] = await showOpenFilePicker({ 'types': [{ 'description': 'JSON files', 'accept': { 'application/json': '.json' } }] }),
+            const [handle] = await showOpenFilePicker({ 'excludeAcceptAllOption': true, 'types': [{ 'description': 'JSON files', 'accept': { 'application/json': ['.json'] } }] }),
                 file = await handle.getFile(),
                 reader = new FileReader();
             reader.readAsText(file);
