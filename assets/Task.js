@@ -17,7 +17,7 @@ export class Task {
      * Determine if this task is completed or not.
      */
     isComplete() {
-        return this.end !== 0;
+        return this.end > this.start;
     }
 
     /**
@@ -42,7 +42,25 @@ export class Task {
      * Return human-readable start and end dates for this task.
      */
     getTimeRange() {
-        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isComplete() ? 'Completed on ' + new Date(this.end).toLocaleString() : 'In progress') + '.';
+        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isComplete() ? 'Completed on ' + new Date(this.end).toLocaleString() + ' (' + this.#getTimeSpan() + ')' : 'In progress') + '.';
+    }
+
+    /**
+     * Calculate the time span in days and hours.
+     */
+    #getTimeSpan() {
+        if (this.isComplete()) {
+            const hour = 1000 * 60 * 60,
+                day = hour * 24,
+                spanMS = this.end - this.start,
+                days = Math.floor(spanMS / day),
+                hours = Math.floor((spanMS % day) / hour);
+            if (days) {
+                return days + ' days' + (hours ? ' and ' + hours + ' hours' : '');
+            } else {
+                return hours + ' hours';
+            }
+        }
     }
 
     /**

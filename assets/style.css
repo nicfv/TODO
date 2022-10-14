@@ -118,6 +118,15 @@ select {
     margin: 0.5em 1em;
 }
 
+p#v {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    font-size: 0.5em;
+    margin: 0;
+    padding: 0.25em;
+}
+
 .clear {
     clear: both;
 }
