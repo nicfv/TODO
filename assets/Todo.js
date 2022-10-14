@@ -71,7 +71,7 @@ export class TodoList {
     static forEach(callback = () => { }, showAll = true, startTimestamp = 0, endTimestamp = 0) {
         TodoList.#list.filter(task => task.id > 0)
             .filter(task => showAll || !task.isComplete())
-            .filter(task => !startTimestamp || task.end >= startTimestamp)
+            .filter(task => !startTimestamp || task.start >= startTimestamp)
             .filter(task => !endTimestamp || task.start <= endTimestamp)
             .forEach(task => callback(task));
     }

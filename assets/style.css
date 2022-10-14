@@ -16,14 +16,14 @@ div#controls {
 }
 
 div#filters {
-    background: #ccc;
+    background: rgba(128, 128, 128, 0.25);
     margin: 0 1em;
     padding: 1em;
     overflow: auto;
 }
 
 div#todo {
-    border: 1px solid #ccc;
+    border: 1px solid rgba(128, 128, 128, 0.25);
     margin: 0em 1em 1em 1em;
     height: 30%;
     padding: 1em;
@@ -36,7 +36,7 @@ div#todo button {
 }
 
 div#form {
-    border: 1px solid #ccc;
+    border: 1px solid rgba(128, 128, 128, 0.25);
     margin: 1em;
     padding: 0;
 }
@@ -85,8 +85,24 @@ button#close {
     background: #933;
 }
 
+button#close:hover {
+    background: #a44;
+}
+
+button#close:active {
+    background: #822;
+}
+
 button#pare {
     background: #993;
+}
+
+button#pare:hover {
+    background: #aa4;
+}
+
+button#pare:active {
+    background: #882;
 }
 
 p#name,
@@ -135,4 +151,15 @@ p#v {
 
 .clear {
     clear: both;
+}
+
+@media(prefers-color-scheme: dark) {
+    body {
+        background: #222;
+        color: white;
+    }
+
+    p#name {
+        border-color: white;
+    }
 }

@@ -53,12 +53,12 @@ export class Task {
             const hour = 1000 * 60 * 60,
                 day = hour * 24,
                 spanMS = this.end - this.start,
-                days = Math.floor(spanMS / day),
-                hours = Math.floor((spanMS % day) / hour);
-            if (days) {
-                return days + ' days' + (hours ? ' and ' + hours + ' hours' : '');
+                days = Math.round(spanMS / day),
+                hours = Math.round(spanMS / hour);
+            if (spanMS >= day) {
+                return days + ' day' + (days === 1 ? '' : 's');
             } else {
-                return hours + ' hours';
+                return hours + ' hour' + (hours === 1 ? '' : 's');
             }
         }
     }

@@ -11,6 +11,9 @@
     <link rel="icon" type="image/png" href="assets/favicon.png">
     <link rel="stylesheet" type="text/css" href="assets/style.css">
     <script type="module" src="assets/main.js"></script>
+    <script type="text/javascript">
+        const timeStamp = (year = 2000, month = 1, day = 1) => new Date(year, month - 1, day).getTime();
+    </script>
 </head>
 
 <body>
@@ -37,7 +40,7 @@
         <button id="cmpl" title="Mark task as completed.">Complete</button>
         <button id="assn" title="Add a new item in the to-do list.">Assign</button>
     </div>
-    <p id="v" title="Version">v1.4</p>
+    <p id="v" title="Version">v1.5</p>
 </body>
 
 </html>
