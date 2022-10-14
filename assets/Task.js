@@ -69,7 +69,7 @@ export class Task {
     toString() {
         const maxLength = 30,
             firstLine = this.desc.trim().split('\n')[0].trim() || '(empty)';
-        return '[' + this.id + '] ' + (firstLine > maxLength ? firstLine.substring(0, maxLength - 3) + '...' : firstLine);
+        return '[' + this.id + '] ' + (firstLine.length > maxLength ? firstLine.substring(0, maxLength - 3) + '...' : firstLine);
     }
 
     /**
