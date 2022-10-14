@@ -125,7 +125,7 @@ select {
 }
 
 p#v {
-    position: absolute;
+    position: fixed;
     right: 0;
     bottom: 0;
     font-size: 0.5em;
