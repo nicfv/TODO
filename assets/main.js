@@ -26,7 +26,6 @@ function init() {
     el('close').onclick = closeForm;
     el('desc').oninput = editedDesc;
     el('assn').onclick = newTask;
-    closeForm();
 }
 
 /**

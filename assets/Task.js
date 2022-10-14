@@ -50,8 +50,8 @@ export class Task {
      */
     toString() {
         const maxLength = 30,
-            lines = this.desc.trim().split('\n').filter(x => x);
-        return '[' + this.id + '] ' + (this.desc.length > maxLength || lines.length > 1 ? lines[0].trim().substring(0, maxLength - 3).trim() + '...' : lines[0].trim());
+            firstLine = this.desc.trim().split('\n')[0].trim() || '(empty)';
+        return '[' + this.id + '] ' + (firstLine > maxLength ? firstLine.substring(0, maxLength - 3) + '...' : firstLine);
     }
 
     /**
