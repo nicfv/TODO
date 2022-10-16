@@ -40,6 +40,7 @@ function save() {
                 writable = await handle.createWritable();
             await writable.write(data);
             writable.close();
+            savedData();
         })();
     } else {
         console.log('Classic');
@@ -50,6 +51,7 @@ function save() {
         downloadElement.href = savedFile;
         downloadElement.click();
         window.URL.revokeObjectURL(savedFile);
+        savedData();
     }
 }
 
@@ -65,6 +67,7 @@ function open() {
                 reader = new FileReader();
             reader.readAsText(file);
             reader.onload = () => TodoList.load(JSON.parse(reader.result), refresh);
+            savedData();
         })();
     } else {
         console.log('Classic');
@@ -76,6 +79,7 @@ function open() {
             const reader = new FileReader();
             reader.readAsText(fileInput.files[0]);
             reader.onload = () => TodoList.load(JSON.parse(reader.result), refresh);
+            savedData();
         };
     }
 }
@@ -85,6 +89,7 @@ function open() {
  */
 function newTask() {
     show(TodoList.newTask(getDesc(), getPID()));
+    unsavedData();
     refresh();
 }
 
@@ -97,11 +102,28 @@ function editedDesc() {
 }
 
 /**
+ * Call this function when there is unsaved data. Prevents the user from accidentally losing unsaved data.
+ */
+function unsavedData() {
+    el('load').disabled = true;
+    el('save').disabled = false;
+}
+
+/**
+ * Call this function after data is saved. Prevents the user from overwriting saved data.
+ */
+function savedData() {
+    el('load').disabled = false;
+    el('save').disabled = true;
+}
+
+/**
  * Create a line item for the current task.
  */
 function getLineItem(task) {
     if (!(task instanceof Task)) { return; }
     const item = document.createElement('button');
+    item.title = 'Click here to view more details for ' + task.toString();
     if (task.isComplete()) {
         const strikethrough = document.createElement('s');
         strikethrough.innerText = task.toString();
@@ -131,10 +153,12 @@ function show(id = 0) {
             task.desc = getDesc();
             el('updt').disabled = true;
             refresh();
+            unsavedData();
         }, completeTask = () => {
             task.complete();
             refresh();
             show(id);
+            unsavedData();
         }
         showForm(task.toString(), task.getTimeRange(), task.hasParent(), () => task.hasParent() && show(task.pid), task.desc, !task.isComplete(), false, !task.isComplete(), false, updateDesc, !task.isComplete(), !task.isComplete(), completeTask, false, false);
     } else {
