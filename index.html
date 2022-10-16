@@ -17,30 +17,32 @@
 </head>
 
 <body>
-    <div id="controls">
-        <button id="load" title="Open the to-do file from your desktop.">Load</button>
-        <button id="save" title="Save your to-do list to your desktop for later." disabled>Save</button>
-        <button id="new" title="Add a new task item to the to-do list.">New</button>
+    <div id="flex">
+        <div id="controls">
+            <button id="load" title="Open the to-do file from your desktop.">Load</button>
+            <button id="save" title="Save your to-do list to your desktop for later." disabled>Save</button>
+            <button id="new" title="Add a new task item to the to-do list.">New</button>
+        </div>
+        <div id="filters" title="Set viewing filters for your to-do list.">
+            <input id="start" type="date" /><label for="start">Start date</label>
+            <input id="end" type="date" /><label for="end">End date</label>
+            <input id="filter" type="checkbox" checked /><label for="filter">Only show incomplete tasks</label>
+        </div>
+        <div id="todo"></div>
+        <div id="form" hidden>
+            <button id="close" title="Close the window.">x</button>
+            <button id="pare" title="Click here to go to the parent task.">^</button>
+            <div class="clear"></div>
+            <p id="name" title="A unique, shorthand title for this task."></p>
+            <p id="date" title="Displays when the task was started and completed."></p>
+            <textarea id="desc" placeholder="Description" title="Type a description for the to-do task."></textarea>
+            <select id="pids" title="Optionally designate a parent task for organization."></select>
+            <button id="updt" title="Overwrite task description.">Update</button>
+            <button id="cmpl" title="Mark task as completed.">Complete</button>
+            <button id="assn" title="Add a new item in the to-do list.">Assign</button>
+        </div>
     </div>
-    <div id="filters" title="Set viewing filters for your to-do list.">
-        <input id="start" type="date" /><label for="start">Start date</label>
-        <input id="end" type="date" /><label for="end">End date</label>
-        <input id="filter" type="checkbox" checked /><label for="filter">Only show incomplete tasks</label>
-    </div>
-    <div id="todo"></div>
-    <div id="form" hidden>
-        <button id="close" title="Close the window.">x</button>
-        <button id="pare" title="Click here to go to the parent task.">^</button>
-        <div class="clear"></div>
-        <p id="name" title="A unique, shorthand title for this task."></p>
-        <p id="date" title="Displays when the task was started and completed."></p>
-        <textarea id="desc" placeholder="Description" title="Type a description for the to-do task."></textarea>
-        <select id="pids" title="Optionally designate a parent task for organization."></select>
-        <button id="updt" title="Overwrite task description.">Update</button>
-        <button id="cmpl" title="Mark task as completed.">Complete</button>
-        <button id="assn" title="Add a new item in the to-do list.">Assign</button>
-    </div>
-    <p id="v" title="Version">v1.6</p>
+    <p id="v" title="Version">v1.7</p>
 </body>
 
 </html>

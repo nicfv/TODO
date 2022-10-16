@@ -11,6 +11,12 @@ body {
     height: 100%;
 }
 
+div#flex {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 div#controls {
     text-align: center;
 }
@@ -19,13 +25,12 @@ div#filters {
     background: rgba(128, 128, 128, 0.25);
     margin: 0 1em;
     padding: 1em;
-    overflow: auto;
 }
 
 div#todo {
+    height: 100%;
     border: 1px solid rgba(128, 128, 128, 0.25);
     margin: 0em 1em 1em 1em;
-    height: 30%;
     padding: 1em;
     overflow: auto;
 }
@@ -37,7 +42,7 @@ div#todo button {
 
 div#form {
     border: 1px solid rgba(128, 128, 128, 0.25);
-    margin: 1em;
+    margin: 0em 1em 1em 1em;
     padding: 0;
 }
 
