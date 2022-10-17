@@ -53,15 +53,15 @@ export class TodoList {
      * Return the parent task of this task.
      */
     static findParent(id = 0) {
-        const self = this.findTask(id);
-        return (self && self.hasParent()) ? this.findTask(self.pid) : undefined;
+        const self = TodoList.findTask(id);
+        return (self && self.hasParent()) ? TodoList.findTask(self.pid) : undefined;
     }
 
     /**
      * Find related siblings of this task.
      */
     static findSiblings(id = 0) {
-        const self = this.findTask(id);
+        const self = TodoList.findTask(id);
         return self.hasParent() ? TodoList.#list.filter(task => task.pid === self.pid && task.id !== self.id) : [];
     }
 

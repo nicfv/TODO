@@ -39,6 +39,17 @@ export class Task {
     }
 
     /**
+     * Mark this task item as incomplete.
+     */
+    incomplete() {
+        if (this.isComplete()) {
+            this.end = 0;
+        } else {
+            throw new Error('This task (' + this.id + ') is not completed.');
+        }
+    }
+
+    /**
      * Return human-readable start and end dates for this task.
      */
     getTimeRange() {
