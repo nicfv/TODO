@@ -68,9 +68,9 @@ export class TodoList {
     /**
      * Call the callback function on all tasks in the to-do list, after applying filters.
      */
-    static forEach(callback = () => { }, showAll = true, startTimestamp = 0, endTimestamp = 0) {
+    static forEach(callback = () => { }, showIncomplete = true, showComplete = true, showCancelled = true, startTimestamp = 0, endTimestamp = 0) {
         TodoList.#list.filter(task => task.id > 0)
-            .filter(task => showAll || !task.isComplete())
+            .filter(task => (showIncomplete && task.isIncomplete()) || (showComplete && task.isComplete()) || (showCancelled && task.isCancelled()))
             .filter(task => !startTimestamp || task.start >= startTimestamp)
             .filter(task => !endTimestamp || task.start <= endTimestamp)
             .forEach(task => callback(task));

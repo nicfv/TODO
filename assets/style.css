@@ -47,6 +47,10 @@ div#form {
 }
 
 s {
+    color: #afa;
+}
+
+s.cancel {
     color: #aaa;
 }
 

@@ -7,7 +7,9 @@ window.onload = init;
  * General helper functions.
  */
 const el = id => document.getElementById(id),
-    showAll = () => !el('filter').checked,
+    showIncomplete = () => el('filter_incm').checked,
+    showCompleted = () => el('filter_cmpl').checked,
+    showCancelled = () => el('filter_cncl').checked,
     startDate = () => new Date(el('start').value).getTime() || 0,
     endDate = () => (new Date(el('end').value).getTime() + 24 * 60 * 60 * 1000) || 0,
     getDesc = () => el('desc').value,
@@ -22,7 +24,9 @@ function init() {
     el('new').onclick = showNewForm;
     el('start').onchange = refresh;
     el('end').onchange = refresh;
-    el('filter').onchange = refresh;
+    el('filter_incm').onchange = refresh;
+    el('filter_cmpl').onchange = refresh;
+    el('filter_cncl').onchange = refresh;
     el('close').onclick = closeForm;
     el('desc').oninput = editedDesc;
     el('assn').onclick = newTask;
@@ -124,9 +128,10 @@ function getLineItem(task) {
     if (!(task instanceof Task)) { return; }
     const item = document.createElement('button');
     item.title = 'Click here to view more details for ' + task.toString();
-    if (task.isComplete()) {
+    if (task.isComplete() || task.isCancelled()) {
         const strikethrough = document.createElement('s');
         strikethrough.innerText = task.toString();
+        strikethrough.setAttribute('class', task.isCancelled() ? 'cancel' : 'complete');
         item.appendChild(strikethrough);
     } else {
         item.innerText = task.toString();
@@ -140,7 +145,7 @@ function getLineItem(task) {
  */
 function refresh() {
     removeAllChildren(el('todo'));
-    TodoList.forEach(task => el('todo').appendChild(getLineItem(task)), showAll(), startDate(), endDate());
+    TodoList.forEach(task => el('todo').appendChild(getLineItem(task)), showIncomplete(), showCompleted(), showCancelled(), startDate(), endDate());
 }
 
 /**
@@ -155,6 +160,11 @@ function show(id = 0) {
             refresh();
             show(id);
             unsavedData();
+        }, cancelTask = () => {
+            task.cancel();
+            refresh();
+            show(id);
+            unsavedData();
         }, completeTask = () => {
             task.complete();
             refresh();
@@ -166,7 +176,7 @@ function show(id = 0) {
             show(id);
             unsavedData();
         };
-        showForm(task.toString(), task.getTimeRange(), task.hasParent(), () => task.hasParent() && show(task.pid), task.desc, !task.isComplete(), false, !task.isComplete(), false, updateDesc, !task.isComplete(), !task.isComplete(), completeTask, task.isComplete(), incompleteTask, false, false);
+        showForm(task.toString(), task.getTimeRange(), task.hasParent(), () => task.hasParent() && show(task.pid), task.desc, task.isIncomplete(), false, task.isIncomplete(), false, updateDesc, task.isIncomplete(), cancelTask, task.isIncomplete(), completeTask, task.isCancelled() ? 'Reassign' : 'Incomplete', !task.isIncomplete(), incompleteTask, false, false);
     } else {
         throw new Error('No task found with id ' + id + '.');
     }
@@ -176,13 +186,13 @@ function show(id = 0) {
  * Show a form ready to accept data for a new to-do task item.
  */
 function showNewForm() {
-    showForm('', '', false, null, '', true, true, false, false, null, false, false, null, false, null, true, false);
+    showForm('', '', false, null, '', true, true, false, false, null, false, null, false, null, 'Incomplete', false, null, true, false);
 }
 
 /**
  * Show the form and customize which controls are shown and enabled.
  */
-function showForm(name = '', date = '', parentVisible = false, parentOnClick = () => { }, description = '', descriptionEnabled = false, parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, completeVisible = false, completeEnabled = false, completeOnClick = () => { }, incompleteVisible = false, incompleteOnClick = () => { }, assignVisible = false, assignEnabled = false) {
+function showForm(name = '', date = '', parentVisible = false, parentOnClick = () => { }, description = '', descriptionEnabled = false, parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, cancelVisible = false, cancelOnClick = () => { }, completeVisible = false, completeOnClick = () => { }, incompleteText = '', incompleteVisible = false, incompleteOnClick = () => { }, assignVisible = false, assignEnabled = false) {
     el('form').hidden = false;
     el('name').innerText = name;
     el('name').hidden = !name;
@@ -196,9 +206,13 @@ function showForm(name = '', date = '', parentVisible = false, parentOnClick = (
     el('updt').hidden = !updateVisible;
     el('updt').disabled = !updateEnabled;
     el('updt').onclick = updateOnClick;
+    el('cncl').hidden = !cancelVisible;
+    el('cncl').disabled = !cancelVisible;
+    el('cncl').onclick = cancelOnClick;
     el('cmpl').hidden = !completeVisible;
-    el('cmpl').disabled = !completeEnabled;
+    el('cmpl').disabled = !completeVisible;
     el('cmpl').onclick = completeOnClick;
+    el('incm').textContent = incompleteText;
     el('incm').hidden = !incompleteVisible;
     el('incm').disabled = !incompleteVisible;
     el('incm').onclick = incompleteOnClick;
@@ -246,5 +260,5 @@ function setParentIDs() {
             option.value = task.id;
             el('pids').appendChild(option);
         }
-    }, false);
+    }, true, false, false);
 }

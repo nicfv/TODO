@@ -5,7 +5,7 @@ export class Task {
     /**
      * Create a new task based on user-defined parameters.
      */
-    constructor(id = 0, parentId = 0, description = '', start = Date.now(), end = 0) {
+    constructor(id = 0, parentId = Status.NO_PARENT, description = '', start = Date.now(), end = Status.INCOMPLETE) {
         this.id = id;
         this.pid = parentId;
         this.desc = description;
@@ -14,27 +14,52 @@ export class Task {
     }
 
     /**
-     * Determine if this task is completed or not.
+     * Determine if this task is still incomplete.
+     */
+    isIncomplete() {
+        return this.end === Status.INCOMPLETE;
+    }
+
+    /**
+     * Determine if this task is cancelled or not.
+     */
+    isCancelled() {
+        return this.end === Status.CANCELLED;
+    }
+
+    /**
+     * Determine if this task is marked as completed and not cancelled.
      */
     isComplete() {
-        return this.end > this.start;
+        return !this.isIncomplete() && !this.isCancelled();
     }
 
     /**
      * Determine if this task is a child task.
      */
     hasParent() {
-        return this.pid !== 0;
+        return this.pid !== Status.NO_PARENT;
     }
 
     /**
      * Mark this task item as complete.
      */
     complete() {
-        if (!this.isComplete()) {
+        if (this.isIncomplete() && !this.isCancelled()) {
             this.end = Date.now();
         } else {
-            throw new Error('This task (' + this.id + ') is already completed.');
+            throw new Error('This task (' + this.id + ') is already completed or cancelled.');
+        }
+    }
+
+    /**
+     * Cancel this task item.
+     */
+    cancel() {
+        if (this.isIncomplete() && !this.isCancelled()) {
+            this.end = Status.CANCELLED;
+        } else {
+            throw new Error('This task (' + this.id + ') is already completed or cancelled.');
         }
     }
 
@@ -42,10 +67,10 @@ export class Task {
      * Mark this task item as incomplete.
      */
     incomplete() {
-        if (this.isComplete()) {
-            this.end = 0;
+        if (!this.isIncomplete() || this.isCancelled()) {
+            this.end = Status.INCOMPLETE;
         } else {
-            throw new Error('This task (' + this.id + ') is not completed.');
+            throw new Error('This task (' + this.id + ') is not completed or cancelled.');
         }
     }
 
@@ -53,7 +78,7 @@ export class Task {
      * Return human-readable start and end dates for this task.
      */
     getTimeRange() {
-        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isComplete() ? 'Completed on ' + new Date(this.end).toLocaleString() + ' (' + this.#getTimeSpan() + ')' : 'In progress') + '.';
+        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isCancelled() ? 'Cancelled' : (this.isComplete() ? 'Completed on ' + new Date(this.end).toLocaleString() + ' (' + this.#getTimeSpan() + ')' : 'In progress')) + '.';
     }
 
     /**
@@ -94,3 +119,9 @@ export class Task {
         }
     }
 }
+
+const Status = {
+    INCOMPLETE: 0,
+    CANCELLED: -1,
+    NO_PARENT: 0,
+};
