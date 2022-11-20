@@ -45,7 +45,7 @@ export class Task {
      * Mark this task item as complete.
      */
     complete() {
-        if (this.isIncomplete() && !this.isCancelled()) {
+        if (this.isIncomplete()) {
             this.end = Date.now();
         } else {
             throw new Error('This task (' + this.id + ') is already completed or cancelled.');
@@ -56,7 +56,7 @@ export class Task {
      * Cancel this task item.
      */
     cancel() {
-        if (this.isIncomplete() && !this.isCancelled()) {
+        if (this.isIncomplete()) {
             this.end = Status.CANCELLED;
         } else {
             throw new Error('This task (' + this.id + ') is already completed or cancelled.');
@@ -67,10 +67,22 @@ export class Task {
      * Mark this task item as incomplete.
      */
     incomplete() {
-        if (!this.isIncomplete() || this.isCancelled()) {
+        if (this.isComplete()) {
             this.end = Status.INCOMPLETE;
         } else {
-            throw new Error('This task (' + this.id + ') is not completed or cancelled.');
+            throw new Error('This task (' + this.id + ') is not completed.');
+        }
+    }
+
+    /**
+     * Reassign a cancelled task.
+     */
+    reassign() {
+        if (this.isCancelled()) {
+            this.end = Status.INCOMPLETE;
+            this.start = Date.now();
+        } else {
+            throw new Error('This task (' + this.id + ') is not cancelled.');
         }
     }
 
@@ -120,6 +132,9 @@ export class Task {
     }
 }
 
+/**
+ * Represents an enum of Task statuses.
+ */
 const Status = {
     INCOMPLETE: 0,
     CANCELLED: -1,

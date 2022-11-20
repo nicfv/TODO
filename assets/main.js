@@ -130,11 +130,11 @@ function getLineItem(task) {
     item.title = 'Click here to view more details for ' + task.toString();
     if (task.isComplete() || task.isCancelled()) {
         const strikethrough = document.createElement('s');
-        strikethrough.innerText = task.toString();
+        strikethrough.textContent = task.toString();
         strikethrough.setAttribute('class', task.isCancelled() ? 'cancel' : 'complete');
         item.appendChild(strikethrough);
     } else {
-        item.innerText = task.toString();
+        item.textContent = task.toString();
     }
     item.onclick = () => show(task.id);
     return item;
@@ -175,8 +175,13 @@ function show(id = 0) {
             refresh();
             show(id);
             unsavedData();
+        }, reassignTask = () => {
+            task.reassign();
+            refresh();
+            show(id);
+            unsavedData();
         };
-        showForm(task.toString(), task.getTimeRange(), task.hasParent(), () => task.hasParent() && show(task.pid), task.desc, task.isIncomplete(), false, task.isIncomplete(), false, updateDesc, task.isIncomplete(), cancelTask, task.isIncomplete(), completeTask, task.isCancelled() ? 'Reassign' : 'Incomplete', !task.isIncomplete(), incompleteTask, false, false);
+        showForm(task.toString(), task.getTimeRange(), task.hasParent(), () => task.hasParent() && show(task.pid), task.desc, task.isIncomplete(), false, task.isIncomplete(), false, updateDesc, task.isIncomplete(), cancelTask, task.isIncomplete(), completeTask, task.isComplete(), incompleteTask, task.isCancelled(), reassignTask, false, false);
     } else {
         throw new Error('No task found with id ' + id + '.');
     }
@@ -186,17 +191,17 @@ function show(id = 0) {
  * Show a form ready to accept data for a new to-do task item.
  */
 function showNewForm() {
-    showForm('', '', false, null, '', true, true, false, false, null, false, null, false, null, 'Incomplete', false, null, true, false);
+    showForm('', '', false, null, '', true, true, false, false, null, false, null, false, null, false, null, false, null, true, false);
 }
 
 /**
  * Show the form and customize which controls are shown and enabled.
  */
-function showForm(name = '', date = '', parentVisible = false, parentOnClick = () => { }, description = '', descriptionEnabled = false, parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, cancelVisible = false, cancelOnClick = () => { }, completeVisible = false, completeOnClick = () => { }, incompleteText = '', incompleteVisible = false, incompleteOnClick = () => { }, assignVisible = false, assignEnabled = false) {
+function showForm(name = '', date = '', parentVisible = false, parentOnClick = () => { }, description = '', descriptionEnabled = false, parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, cancelVisible = false, cancelOnClick = () => { }, completeVisible = false, completeOnClick = () => { }, incompleteVisible = false, incompleteOnClick = () => { }, reassignVisible = false, reassignOnClick = () => { }, assignVisible = false, assignEnabled = false) {
     el('form').hidden = false;
-    el('name').innerText = name;
+    el('name').textContent = name;
     el('name').hidden = !name;
-    el('date').innerText = date;
+    el('date').textContent = date;
     el('date').hidden = !date;
     el('pare').hidden = !parentVisible;
     el('pare').onclick = parentOnClick;
@@ -212,10 +217,12 @@ function showForm(name = '', date = '', parentVisible = false, parentOnClick = (
     el('cmpl').hidden = !completeVisible;
     el('cmpl').disabled = !completeVisible;
     el('cmpl').onclick = completeOnClick;
-    el('incm').textContent = incompleteText;
     el('incm').hidden = !incompleteVisible;
     el('incm').disabled = !incompleteVisible;
     el('incm').onclick = incompleteOnClick;
+    el('reas').hidden = !reassignVisible;
+    el('reas').disabled = !reassignVisible;
+    el('reas').onclick = reassignOnClick;
     el('assn').hidden = !assignVisible;
     el('assn').disabled = !assignEnabled;
     setParentIDs();
@@ -243,7 +250,7 @@ function removeAllChildren(element) {
 function clearParentIDs() {
     removeAllChildren(el('pids'));
     const defaultOption = document.createElement('option');
-    defaultOption.innerText = 'No Parent';
+    defaultOption.textContent = 'No Parent';
     defaultOption.value = 0;
     el('pids').appendChild(defaultOption);
 }
@@ -256,7 +263,7 @@ function setParentIDs() {
     TodoList.forEach(task => {
         if (task instanceof Task) {
             const option = document.createElement('option');
-            option.innerText = task.toString();
+            option.textContent = task.toString();
             option.value = task.id;
             el('pids').appendChild(option);
         }
