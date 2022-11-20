@@ -40,11 +40,6 @@ div#todo button {
     display: block;
 }
 
-div#todo button.complete,
-div#todo button.cancel {
-    text-decoration: line-through;
-}
-
 div#form {
     border: 1px solid rgba(128, 128, 128, 0.25);
     margin: 0em 1em 1em 1em;
