@@ -4,6 +4,11 @@ import { TodoList } from './Todo.js';
 window.onload = init;
 
 /**
+ * Represents the task that is currently selected.
+ */
+let currentTask = undefined;
+
+/**
  * General helper functions.
  */
 const el = id => document.getElementById(id),
@@ -28,7 +33,13 @@ function init() {
     el('filter_cmpl').onchange = refresh;
     el('filter_cncl').onchange = refresh;
     el('close').onclick = closeForm;
+    el('pare').onclick = showParent;
     el('desc').oninput = editedDesc;
+    el('updt').onclick = updateDesc;
+    el('cncl').onclick = cancelTask;
+    el('cmpl').onclick = completeTask;
+    el('incm').onclick = incompleteTask;
+    el('reas').onclick = reassignTask;
     el('assn').onclick = newTask;
 }
 
@@ -92,7 +103,7 @@ function open() {
  * Assign a new task to the to-do list.
  */
 function newTask() {
-    show(TodoList.newTask(getDesc(), getPID()));
+    show(TodoList.findTask(TodoList.newTask(getDesc(), getPID())));
     unsavedData();
     refresh();
 }
@@ -122,21 +133,101 @@ function savedData() {
 }
 
 /**
+ * Update the description of the selected task.
+ */
+function updateDesc() {
+    if (currentTask instanceof Task) {
+        currentTask.desc = getDesc();
+        el('updt').disabled = true;
+        unsavedData();
+        refresh();
+        show(currentTask);
+    } else {
+        throw new Error('No task is selected.');
+    }
+}
+
+/**
+ * Cancel the selected task.
+ */
+function cancelTask() {
+    if (currentTask instanceof Task) {
+        currentTask.cancel();
+        unsavedData();
+        refresh();
+        show(currentTask);
+    } else {
+        throw new Error('No task is selected.');
+    }
+}
+
+/**
+ * Mark the selected task as completed.
+ */
+function completeTask() {
+    if (currentTask instanceof Task) {
+        currentTask.complete();
+        unsavedData();
+        refresh();
+        show(currentTask);
+    } else {
+        throw new Error('No task is selected.');
+    }
+}
+
+/**
+ * Mark the selected task as incomplete.
+ */
+function incompleteTask() {
+    if (currentTask instanceof Task) {
+        currentTask.incomplete();
+        unsavedData();
+        refresh();
+        show(currentTask);
+    } else {
+        throw new Error('No task is selected.');
+    }
+}
+
+/**
+ * Reassign the selected task.
+ */
+function reassignTask() {
+    if (currentTask instanceof Task) {
+        currentTask.reassign();
+        unsavedData();
+        refresh();
+        show(currentTask);
+    } else {
+        throw new Error('No task is selected.');
+    }
+}
+
+/**
+ * Show the parent task of the currently selected task, if one exists.
+ */
+function showParent() {
+    if (!(currentTask instanceof Task)) {
+        throw new Error('No task is selected.');
+    } else if (!currentTask.hasParent()) {
+        throw new Error('Current task does not have a parent.');
+    } else {
+        show(TodoList.findTask(currentTask.pid));
+    }
+}
+
+/**
  * Create a line item for the current task.
  */
 function getLineItem(task) {
     if (!(task instanceof Task)) { return; }
     const item = document.createElement('button');
     item.title = 'Click here to view more details for ' + task.toString();
-    if (task.isComplete() || task.isCancelled()) {
-        const strikethrough = document.createElement('s');
-        strikethrough.textContent = task.toString();
-        strikethrough.setAttribute('class', task.isCancelled() ? 'cancel' : 'complete');
-        item.appendChild(strikethrough);
-    } else {
-        item.textContent = task.toString();
-    }
-    item.onclick = () => show(task.id);
+    task.isCancelled() && item.setAttribute('class', 'cancel');
+    task.isCompleted() && item.setAttribute('class', 'complete');
+    task.isIncomplete() && item.setAttribute('class', 'incomplete');
+    item.textContent = task.toString();
+    item.onclick = () => show(task);
     return item;
 }
 
@@ -149,83 +240,48 @@ function refresh() {
 }
 
 /**
- * Show the details of a to-do task item.
- */
-function show(id = 0) {
-    const task = TodoList.findTask(id);
-    if (task instanceof Task) {
-        const updateDesc = () => {
-            task.desc = getDesc();
-            el('updt').disabled = true;
-            refresh();
-            show(id);
-            unsavedData();
-        }, cancelTask = () => {
-            task.cancel();
-            refresh();
-            show(id);
-            unsavedData();
-        }, completeTask = () => {
-            task.complete();
-            refresh();
-            show(id);
-            unsavedData();
-        }, incompleteTask = () => {
-            task.incomplete();
-            refresh();
-            show(id);
-            unsavedData();
-        }, reassignTask = () => {
-            task.reassign();
-            refresh();
-            show(id);
-            unsavedData();
-        };
-        showForm(task.toString(), task.getTimeRange(), task.hasParent(), () => task.hasParent() && show(task.pid), task.desc, task.isIncomplete(), false, task.isIncomplete(), false, updateDesc, task.isIncomplete(), cancelTask, task.isIncomplete(), completeTask, task.isComplete(), incompleteTask, task.isCancelled(), reassignTask, false, false);
-    } else {
-        throw new Error('No task found with id ' + id + '.');
-    }
-}
-
-/**
  * Show a form ready to accept data for a new to-do task item.
  */
 function showNewForm() {
-    showForm('', '', false, null, '', true, true, false, false, null, false, null, false, null, false, null, false, null, true, false);
+    show(undefined);
 }
 
 /**
- * Show the form and customize which controls are shown and enabled.
+ * Show the form with customized controls that are shown and enabled. Show the details of a to-do task item.
  */
-function showForm(name = '', date = '', parentVisible = false, parentOnClick = () => { }, description = '', descriptionEnabled = false, parentIDsVisible = false, updateVisible = false, updateEnabled = false, updateOnClick = () => { }, cancelVisible = false, cancelOnClick = () => { }, completeVisible = false, completeOnClick = () => { }, incompleteVisible = false, incompleteOnClick = () => { }, reassignVisible = false, reassignOnClick = () => { }, assignVisible = false, assignEnabled = false) {
+function show(newTask) {
+    if (newTask instanceof Task || typeof newTask === 'undefined') {
+        currentTask = newTask;
+    } else {
+        throw new Error('Expected parameter types: Task, undefined. Found ' + typeof newTask);
+    }
+    const isSelected = currentTask instanceof Task,
+        hasParent = currentTask instanceof Task && currentTask.hasParent(),
+        isIncomplete = currentTask instanceof Task && currentTask.isIncomplete(),
+        isCompleted = currentTask instanceof Task && currentTask.isCompleted(),
+        isCancelled = currentTask instanceof Task && currentTask.isCancelled();
     el('form').hidden = false;
-    el('name').textContent = name;
-    el('name').hidden = !name;
-    el('date').textContent = date;
-    el('date').hidden = !date;
-    el('pare').hidden = !parentVisible;
-    el('pare').onclick = parentOnClick;
-    el('desc').value = description;
-    el('desc').readOnly = !descriptionEnabled;
-    el('pids').hidden = !parentIDsVisible;
-    el('updt').hidden = !updateVisible;
-    el('updt').disabled = !updateEnabled;
-    el('updt').onclick = updateOnClick;
-    el('cncl').hidden = !cancelVisible;
-    el('cncl').disabled = !cancelVisible;
-    el('cncl').onclick = cancelOnClick;
-    el('cmpl').hidden = !completeVisible;
-    el('cmpl').disabled = !completeVisible;
-    el('cmpl').onclick = completeOnClick;
-    el('incm').hidden = !incompleteVisible;
-    el('incm').disabled = !incompleteVisible;
-    el('incm').onclick = incompleteOnClick;
-    el('reas').hidden = !reassignVisible;
-    el('reas').disabled = !reassignVisible;
-    el('reas').onclick = reassignOnClick;
-    el('assn').hidden = !assignVisible;
-    el('assn').disabled = !assignEnabled;
-    setParentIDs();
+    el('name').textContent = (currentTask instanceof Task) ? currentTask.toString() : '';
+    el('name').hidden = !isSelected;
+    el('date').textContent = (currentTask instanceof Task) ? currentTask.getTimeRange() : '';
+    el('date').hidden = !isSelected;
+    el('pare').hidden = !hasParent;
+    el('desc').value = (currentTask instanceof Task) ? currentTask.desc : '';
+    el('desc').readOnly = !(!isSelected || isIncomplete);
+    el('pids').hidden = isSelected;
+    el('updt').hidden = !isIncomplete;
+    el('updt').disabled = true;
+    el('cncl').hidden = !isIncomplete;
+    el('cncl').disabled = !isIncomplete;
+    el('cmpl').hidden = !isIncomplete;
+    el('cmpl').disabled = !isIncomplete;
+    el('incm').hidden = !isCompleted;
+    el('incm').disabled = !isCompleted;
+    el('reas').hidden = !isCancelled;
+    el('reas').disabled = !isCancelled;
+    el('assn').hidden = isSelected;
+    el('assn').disabled = true;
+    isSelected || setParentIDs();
 }
 
 /**

@@ -30,7 +30,7 @@ export class Task {
     /**
      * Determine if this task is marked as completed and not cancelled.
      */
-    isComplete() {
+    isCompleted() {
         return !this.isIncomplete() && !this.isCancelled();
     }
 
@@ -67,7 +67,7 @@ export class Task {
      * Mark this task item as incomplete.
      */
     incomplete() {
-        if (this.isComplete()) {
+        if (this.isCompleted()) {
             this.end = Status.INCOMPLETE;
         } else {
             throw new Error('This task (' + this.id + ') is not completed.');
@@ -90,14 +90,14 @@ export class Task {
      * Return human-readable start and end dates for this task.
      */
     getTimeRange() {
-        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isCancelled() ? 'Cancelled' : (this.isComplete() ? 'Completed on ' + new Date(this.end).toLocaleString() + ' (' + this.#getTimeSpan() + ')' : 'In progress')) + '.';
+        return 'Assigned on ' + new Date(this.start).toLocaleString() + '. ' + (this.isCancelled() ? 'Cancelled' : (this.isCompleted() ? 'Completed on ' + new Date(this.end).toLocaleString() + ' (' + this.#getTimeSpan() + ')' : 'In progress')) + '.';
     }
 
     /**
      * Calculate the time span in days and hours.
      */
     #getTimeSpan() {
-        if (this.isComplete()) {
+        if (this.isCompleted()) {
             const hour = 1000 * 60 * 60,
                 day = hour * 24,
                 spanMS = this.end - this.start,

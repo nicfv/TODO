@@ -40,18 +40,15 @@ div#todo button {
     display: block;
 }
 
+div#todo button.complete,
+div#todo button.cancel {
+    text-decoration: line-through;
+}
+
 div#form {
     border: 1px solid rgba(128, 128, 128, 0.25);
     margin: 0em 1em 1em 1em;
     padding: 0;
-}
-
-s {
-    color: #afa;
-}
-
-s.cancel {
-    color: #aaa;
 }
 
 label {
@@ -80,7 +77,31 @@ button:active {
 
 button:disabled {
     cursor: default;
-    background: #666;
+    background: #666 !important;
+}
+
+button.complete {
+    background: #396;
+}
+
+button.complete:hover {
+    background: #4a7;
+}
+
+button.complete:active {
+    background: #285;
+}
+
+button.cancel {
+    background: #639;
+}
+
+button.cancel:hover {
+    background: #74a;
+}
+
+button.cancel:active {
+    background: #528;
 }
 
 button#close,
