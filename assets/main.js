@@ -18,7 +18,8 @@ const el = id => document.getElementById(id),
     startDate = () => new Date(el('start').value).getTime() || 0,
     endDate = () => (new Date(el('end').value).getTime() + 24 * 60 * 60 * 1000) || 0,
     getDesc = () => el('desc').value,
-    getPID = () => +el('pids').value;
+    getPID = () => +el('pids').value,
+    setCount = n => el('count').textContent = +n + ' Item' + (+n === 1 ? '' : 's');
 
 /**
  * Initialize event handlers.
@@ -41,6 +42,7 @@ function init() {
     el('incm').onclick = incompleteTask;
     el('reas').onclick = reassignTask;
     el('assn').onclick = newTask;
+    refresh();
 }
 
 /**
@@ -237,6 +239,7 @@ function getLineItem(task) {
 function refresh() {
     removeAllChildren(el('todo'));
     TodoList.forEach(task => el('todo').appendChild(getLineItem(task)), showIncomplete(), showCompleted(), showCancelled(), startDate(), endDate());
+    setCount(el('todo').childNodes.length);
 }
 
 /**
