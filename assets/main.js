@@ -326,5 +326,5 @@ function setParentIDs() {
             option.value = task.id;
             el('pids').appendChild(option);
         }
-    }, true, false, false);
+    }, showIncomplete(), showCompleted(), showCancelled());
 }
